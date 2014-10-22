@@ -20,7 +20,13 @@
 		"scripts": ["main.js", "vendor/underscore.js", "vendor/mustache.min.js", "vendor/jquery-1.11.1.min.js"],
 		"persistent": false
 	},
+	"content_scripts": [{
+		"js": ["vendor/underscore.js", "vendor/mustache.min.js", "vendor/jquery-1.11.1.min.js"],
+		"matches": ["https://www.yammer.com/*"]
+	}],
+	"web_accessible_resources" : ["dragDrop.js"],
 	"permissions": [
+	 	"activeTab",
 		"tabs",
 		"declarativeContent",
 		"https://www.yammer.com/*"

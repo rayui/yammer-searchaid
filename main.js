@@ -1,3 +1,5 @@
+var firstRun = true;
+
 var getTemplate = function(path, callback) {
 	var xhr = new XMLHttpRequest();
 	xhr.onreadystatechange = function(data) {
@@ -10,7 +12,7 @@ var getTemplate = function(path, callback) {
 }
 
 var start = function(data) {
-	//toggleSidebar();
+	alert(data);
 }
 
 chrome.runtime.onInstalled.addListener(function() {
@@ -31,9 +33,13 @@ chrome.runtime.onInstalled.addListener(function() {
 chrome.runtime.onMessage.addListener(start);
 
 chrome.pageAction.onClicked.addListener(function(tab) {
-	chrome.tabs.executeScript(tab.id, {file: "searchaid.js"});
+	if (firstRun) {
+		firstRun = false;
+		chrome.tabs.executeScript(tab.id, {file: "searchaid.js"});
+	}
+
 	window.setTimeout(function() {
 		chrome.tabs.sendMessage(tab.id, chrome.app.getDetails().id);
-	}, 500);
+	}, 1);
 });
 
