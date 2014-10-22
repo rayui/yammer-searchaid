@@ -1,0 +1,28 @@
+{
+  "manifest_version": 2,
+  "name": "Yammer SearchAid",
+	"short_name": "Yammer SearchAid",
+  "version": "0.0.1",
+  "description": "Improve your Yammer experience with SearchAid",
+  "icons": {
+		"48": "yammer-search-aid-logo-48.png",
+		"128": "yammer-search-aid-logo-128.png"
+	},
+	"page_action": {
+		"default_icon": {
+			"19": "yammer-search-aid-logo-19.png",
+			"48": "yammer-search-aid-logo-48.png",
+			"128": "yammer-search-aid-logo-128.png"
+		},
+		"default_title": "Yammer SearchAid"
+	},
+	"background": {
+		"scripts": ["main.js", "vendor/underscore.js", "vendor/mustache.min.js", "vendor/jquery-1.11.1.min.js"],
+		"persistent": false
+	},
+	"permissions": [
+		"tabs",
+		"declarativeContent",
+		"https://www.yammer.com/*"
+	]
+}
