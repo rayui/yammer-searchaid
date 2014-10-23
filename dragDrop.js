@@ -13,6 +13,12 @@
     event.preventDefault();
   };
 
+  context.trashDrop = function(event) {
+    event.preventDefault();
+    var href = event.dataTransfer.getData('text');
+    window.postMessage({ type: "TRASH", text: href }, "*");
+  };
+
   context.onDrop = function(event) {
     event.preventDefault();
     var href = event.dataTransfer.getData('text');

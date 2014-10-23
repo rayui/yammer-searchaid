@@ -1,19 +1,22 @@
-<div id="{{id}}" ondrop="onDrop(event)" ondragover="allowDrop(event)">
-  <h1>Yammer SearchAid</h1>
-  <h2 class="title-people">My People</h2>
-  <ul class="links-list links-user">
-    <li class="links-list-cta">Drop links here to save!</li>
-  </ul>
-  <h2 class="title-group">My Groups</h2>
-  <ul class="links-list links-group">
-    <li class="links-list-cta">Drop links here to save!</li>
-  </ul>
-  <h2 class="title-thread">My Threads</h2>
-  <ul class="links-list links-thread">
-    <li class="links-list-cta">Drop links here to save!</li>
-  </ul>
-  <h2 class="title-other">My Scrapbook</h2>
-  <ul class="links-list links-other">
-    <li class="links-list-cta">Drop links here to save!</li>
-  </ul>
+<div id="{{id}}">
+  <div ondragover="allowDrop(event)" ondrop="onDrop(event)">
+    <h1>Yammer SearchAid</h1>
+    <h2 class="title-people">My People</h2>
+    <ul class="links-list links-user">
+      <li class="links-list-cta">Drop links here to save!</li>
+    </ul>
+    <h2 class="title-group">My Groups</h2>
+    <ul class="links-list links-group">
+      <li class="links-list-cta">Drop links here to save!</li>
+    </ul>
+    <h2 class="title-thread">My Threads</h2>
+    <ul class="links-list links-thread">
+      <li class="links-list-cta">Drop links here to save!</li>
+    </ul>
+    <h2 class="title-other">My Scrapbook</h2>
+    <ul class="links-list links-other">
+      <li class="links-list-cta">Drop links here to save!</li>
+    </ul>
+  </div>
+  <div class="trash" ondragover="allowDrop(event)" ondrop="trashDrop(event)"></div>
 </div>

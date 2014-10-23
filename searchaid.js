@@ -7,18 +7,23 @@
 
   var addPostMessageListener = function() {
 	  context.addEventListener("message", function(event) {
+	  	event.preventDefault();
+
 	  	if (event.source != context) return;
 
 	  	if (event.data.type) {
 	    	if (event.data.type === "FROM_PAGE") {
 					var data = parseDataString(event.data.text);
-					storeLink(data);
+					var key = storeLink(data);
 					var $h2 = $sidebarEl.find('.title-' + data.type);
 					$h2.removeClass('waiting');
-					createLink(data);
+					createLink(data, key);
 				} else if (event.data.type === "WAITING") {
 					var $h2 = $sidebarEl.find('.title-' + event.data.text);
 					$h2.addClass('waiting');
+				} else if (event.data.type === "TRASH") {
+					var href = event.data.text;
+					removeLink(href);
 				}
 			}
 	  }, false);
@@ -35,11 +40,11 @@
 		xhr.send();
 	}
 
-	var createLink = function(data) {
+	var createLink = function(data, key) {
 		if ($sidebarEl && $sidebarEl.length) {
 			var type = data.type ? data.type : 'other';
 			var $ul = $sidebarEl.find('.links-list.links-' + type);
-			var $el = $('<li class="link"><span><a href="' + data.href + '">' + data.title + '</a></span></li>');
+			var $el = $('<li class="link"><span><a data-key=' + key + ' href="' + data.href + '">' + data.title + '</a></span></li>');
 
 			$ul.append($el);
 			$ul.find('.links-list-cta').remove();
@@ -47,20 +52,34 @@
 		}
 	};
 
+	var removeLink = function(href) {
+		var $link = $sidebarEl.find('a[href="' + href + '"]');
+		var key = $link.data('key');
+		$link.parent().remove();
+		chrome.storage.sync.remove(key);
+		return false;
+	}
+
+	var getKeyFromTitle = function(title) {
+		return title.replace(/\W+/g, "_");
+	}
+
 	var storeLink = function(data) {
 		var store = {};
 		var replace = false;
-		var key = data.title.replace(/\W+/g, "_");
+		var key = getKeyFromTitle(data.title);
 
 		store[key] = data;
 
 		chrome.storage.sync.set(store);
+
+		return key;
 	};
 
 	var loadLinks = function() {
 		chrome.storage.sync.get(null, function(keys) {
 			for (key in keys) {
-				createLink(keys[key]);
+				createLink(keys[key], key);
 			}
 		});
 	};
