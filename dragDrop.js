@@ -35,7 +35,12 @@
         postMessage(createDataString(href, title, type));
       });
     } else {
-      postMessage(href);
+      getOtherInfo(href, function(otherData) {
+        var titleStart = otherData.indexOf('<title>') + 7;
+        var titleLength = otherData.indexOf('</title>') - titleStart - 5;
+        var title = otherData.substr(titleStart, titleLength).trim();
+        postMessage(createDataString(href, title, type));
+      });
     }
 
     yam.$('#searchAid').removeClass('shown');
@@ -88,6 +93,18 @@
       makeRequest('users', matches[1], cb);
     }
   };
+
+  var getOtherInfo = function(href, cb) {
+    yam.request({
+      url: href,
+      type: 'GET',
+      auth: 'oauth2',
+      dataType: 'html',
+      success: function(data) {
+        cb(data);
+      }
+    })
+  }
 
   var makeRequest = function(apiName, param, cb) {
     yam.request({
