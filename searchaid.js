@@ -1,6 +1,7 @@
 (function(context) {
 	var appKey;
-	var divId = "searchAid"
+	var DIVID = "searchAid"
+	var SIDEBAR_TEMPLATE = "sidebar.html"
   var port = chrome.runtime.connect();
   var $sidebarEl;
 
@@ -8,18 +9,30 @@
 	  context.addEventListener("message", function(event) {
 	    if (event.source != context) return;
 	    if (event.data.type && (event.data.type == "FROM_PAGE")) {
-	    	var data = parseDataString(event.data.text);
-	    	storeLink(data);
+				var data = parseDataString(event.data.text);
+				storeLink(data);
 				createLink(data);
 			}
 	  }, false);
 	};
 
+	var getTemplate = function(path, callback) {
+		var xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function(data) {
+			if (data.target.readyState === 4) {
+				callback(data.target.responseText);
+			}
+		};
+		xhr.open("GET", chrome.extension.getURL(path), true);
+		xhr.send();
+	}
+
 	var createLink = function(data) {
-		if ($sidebarEl.length) {
-			var $el = $('<div class="link"><span><a href="' + data.href + '">' + data.title + '</a></span></div>')
+		if ($sidebarEl && $sidebarEl.length) {
+			var type = data.type ? data.type : 'other';
+			var $el = $('<li class="link"><span><a href="' + data.href + '">' + data.title + '</a></span></li>')
 			$el.click(sendMessageToYammer);
-			$sidebarEl.append($el);
+			$sidebarEl.find('.links-list.links-' + type).append($el);
 		}
 	};
 
@@ -38,7 +51,18 @@
 	};
 
   var parseDataString = function(strData) {
-    return JSON.parse(strData);
+  	var data;
+
+  	try {
+  		data = JSON.parse(strData);
+  	} catch (err) {
+  		data = {
+  			href: strData,
+  			title: strData
+  		}
+  	}
+
+  	return data;
   };
 
   var createDataString = function(href, title) {
@@ -55,17 +79,23 @@
 		window.postMessage({ type: "FROM_SIDEBAR", strData: strInfo}, "*");
   };
 
-	var injectScript = function() {
+	var injectScripts = function() {
 		var s = document.createElement('script');
 		s.appendChild(document.createTextNode('window.yammerSearchAidKey="' + appKey + '";'));
 		(document.head||document.documentElement).appendChild(s);
 		s = document.createElement('script');
 		s.src = chrome.extension.getURL('dragDrop.js');
 		(document.head||document.documentElement).appendChild(s);
+		s = document.createElement('link');
+		s.href = chrome.extension.getURL('searchAid.css');
+		s.media = 'screen, projection';
+		s.rel = 'stylesheet';
+		s.type = 'text/css';
+		(document.head||document.documentElement).appendChild(s);
 	};
 
 	var getDivSelector = function() {
-		return '#' + divId;
+		return '#' + DIVID;
 	};
 
 	var addDroppables = function() {
@@ -80,21 +110,16 @@
 		//don't recreate sidebar
 		if($sidebarEl && $sidebarEl.length > 0) return;
 
-		$sidebarEl = $('<div id="' + divId + '" ondrop="onDrop(event)" ondragover="allowDrop(event)"></div>');
-		$sidebarEl.html("<h1>Yammer SearchAid</h1>");
-		$sidebarEl.css({
-			position:'fixed',
-			top:'0px',
-			right:'0px',
-			width:'25%',
-			height:'100%',
-			background:'white',
-			'box-shadow':'inset 0 0 1em black',
-			'z-index':999999,
-			'display': 'none'
+		getTemplate(SIDEBAR_TEMPLATE, function(template) {
+			$sidebarEl = $(Mustache.to_html(template, {
+				id: DIVID,
+				ext_path: chrome.extension.getURL('')
+			}));
+			$sidebarEl.hide();
+			$('body').append($sidebarEl);
+			loadLinks();
 		});
 
-		$('body').append($sidebarEl);
 	}
 
 	var toggleSidebar = function() {
@@ -108,19 +133,13 @@
 		}
 	};
 
-	var getAppKey = function(key) {
-		appKey = key;
-		//appKey && chrome.runtime.sendMessage(appKey, {data: 'hi'});
-	};
-
 	var start = function(key) {
 		appKey = key;
 		if(!$sidebarEl) {
-			injectScript();
+			injectScripts();
 			addPostMessageListener();
 			createSidebar();
-			loadLinks();
-			addDroppables();
+			//addDroppables();
 		}
 
 		toggleSidebar();

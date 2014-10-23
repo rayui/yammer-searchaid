@@ -1,14 +1,3 @@
-var getTemplate = function(path, callback) {
-	var xhr = new XMLHttpRequest();
-	xhr.onreadystatechange = function(data) {
-		if (data.target.readyState === 4) {
-			callback(data.target.responseText);
-		}
-	};
-	xhr.open("GET", chrome.extension.getURL(path), true);
-	xhr.send();
-}
-
 chrome.runtime.onInstalled.addListener(function() {
 	chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
 	  chrome.declarativeContent.onPageChanged.addRules([

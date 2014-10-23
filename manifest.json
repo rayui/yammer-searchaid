@@ -22,9 +22,10 @@
 	},
 	"content_scripts": [{
 		"js": ["vendor/underscore.js", "vendor/mustache.min.js", "vendor/jquery-1.11.1.min.js"],
-		"matches": ["https://www.yammer.com/*"]
+		"matches": ["https://www.yammer.com/*"],
+		"css": ["searchAid.css"]
 	}],
-	"web_accessible_resources" : ["dragDrop.js"],
+	"web_accessible_resources" : ["dragDrop.js", "sidebar.html", "searchAid.css", "yammer-search-aid-logo-48.png"],
 	"permissions": [
 	 	"activeTab",
 		"tabs",
