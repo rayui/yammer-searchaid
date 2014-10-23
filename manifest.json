@@ -18,7 +18,7 @@
 	},
 	"background": {
 		"scripts": ["main.js", "vendor/underscore.js", "vendor/mustache.min.js", "vendor/jquery-1.11.1.min.js"],
-		"persistent": true
+		"persistent": false
 	},
 	"content_scripts": [{
 		"js": ["vendor/underscore.js", "vendor/mustache.min.js", "vendor/jquery-1.11.1.min.js"],
@@ -28,6 +28,8 @@
 	"permissions": [
 	 	"activeTab",
 		"tabs",
+		"storage",
+		"webNavigation",
 		"declarativeContent",
 		"https://www.yammer.com/*"
 	]

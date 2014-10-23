@@ -6,17 +6,35 @@
 
   var addPostMessageListener = function() {
 	  context.addEventListener("message", function(event) {
-	    // We only accept messages from ourselves
 	    if (event.source != context) return;
 	    if (event.data.type && (event.data.type == "FROM_PAGE")) {
 	    	var data = parseDataString(event.data.text);
-				if ($sidebarEl.length) {
-					var $el = $('<div class="link"><span><a href="' + data.href + '">' + data.title + '</a></span></div>')
-					$el.click(sendMessageToYammer);
-					$sidebarEl.append($el);
-				}
+	    	storeLink(data);
+				createLink(data);
 			}
 	  }, false);
+	};
+
+	var createLink = function(data) {
+		if ($sidebarEl.length) {
+			var $el = $('<div class="link"><span><a href="' + data.href + '">' + data.title + '</a></span></div>')
+			$el.click(sendMessageToYammer);
+			$sidebarEl.append($el);
+		}
+	};
+
+	var storeLink = function(data) {
+		var store = {};
+		store[data.title.replace(/\W+/g, "_")] = data;
+		chrome.storage.sync.set(store);
+	};
+
+	var loadLinks = function() {
+		chrome.storage.sync.get(null, function(keys) {
+			for (key in keys) {
+				createLink(keys[key]);
+			}
+		});
 	};
 
   var parseDataString = function(strData) {
@@ -58,29 +76,35 @@
 		});
 	};
 
+	var createSidebar = function() {
+		//don't recreate sidebar
+		if($sidebarEl && $sidebarEl.length > 0) return;
+
+		$sidebarEl = $('<div id="' + divId + '" ondrop="onDrop(event)" ondragover="allowDrop(event)"></div>');
+		$sidebarEl.html("<h1>Yammer SearchAid</h1>");
+		$sidebarEl.css({
+			position:'fixed',
+			top:'0px',
+			right:'0px',
+			width:'25%',
+			height:'100%',
+			background:'white',
+			'box-shadow':'inset 0 0 1em black',
+			'z-index':999999,
+			'display': 'none'
+		});
+
+		$('body').append($sidebarEl);
+	}
+
 	var toggleSidebar = function() {
-		$sidebarEl = $(getDivSelector());
+		//only attempt toggle if sidebar exists
+		if(!$sidebarEl || $sidebarEl.length === 0) return;
 
-		if($sidebarEl.length) {
-			$sidebarEl.remove();
-		}
-		else {
-			$sidebarEl = $('<div id="' + divId + '" ondrop="onDrop(event)" ondragover="allowDrop(event)"></div>');
-
-			$sidebarEl.html("<h1>Yammer SearchAid</h1>");
-
-			$sidebarEl.css({
-				position:'fixed',
-				top:'0px',
-				right:'0px',
-				width:'25%',
-				height:'100%',
-				background:'white',
-				'box-shadow':'inset 0 0 1em black',
-				'z-index':999999
-			});
-
-			$('body').append($sidebarEl);
+		if($sidebarEl.css('display') === 'none') {
+			$sidebarEl.show();
+		} else {
+			$sidebarEl.hide();
 		}
 	};
 
@@ -91,10 +115,16 @@
 
 	var start = function(key) {
 		appKey = key;
-		injectScript();
-		addPostMessageListener();
+		if(!$sidebarEl) {
+			injectScript();
+			addPostMessageListener();
+			createSidebar();
+			loadLinks();
+			addDroppables();
+		}
+
 		toggleSidebar();
-		addDroppables();
+
 	};
 
 	chrome.runtime.onMessage.addListener(start);

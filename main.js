@@ -1,5 +1,3 @@
-var firstRun = true;
-
 var getTemplate = function(path, callback) {
 	var xhr = new XMLHttpRequest();
 	xhr.onreadystatechange = function(data) {
@@ -11,10 +9,6 @@ var getTemplate = function(path, callback) {
 	xhr.send();
 }
 
-var start = function(data) {
-	alert(data);
-}
-
 chrome.runtime.onInstalled.addListener(function() {
 	chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
 	  chrome.declarativeContent.onPageChanged.addRules([
@@ -24,22 +18,20 @@ chrome.runtime.onInstalled.addListener(function() {
 						pageUrl: { hostEquals: 'www.yammer.com', schemes: ['https']}
 					})
 				],
-				actions: [ new chrome.declarativeContent.ShowPageAction() ]
+				actions: [
+					new chrome.declarativeContent.ShowPageAction()
+				]
 			}
 		]);
 	});
 });
 
-chrome.runtime.onMessage.addListener(start);
-
 chrome.pageAction.onClicked.addListener(function(tab) {
-	if (firstRun) {
-		firstRun = false;
-		chrome.tabs.executeScript(tab.id, {file: "searchaid.js"});
-	}
-
 	window.setTimeout(function() {
 		chrome.tabs.sendMessage(tab.id, chrome.app.getDetails().id);
 	}, 1);
 });
 
+chrome.webNavigation.onDOMContentLoaded.addListener(function(tab) {
+	chrome.tabs.executeScript(tab.id, {file: "searchaid.js"});
+});
