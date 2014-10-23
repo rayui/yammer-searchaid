@@ -9,6 +9,13 @@
   background: #ececec url('yammer-search-aid-logo-48.png') no-repeat 20px 20px;
   padding: 20px;
   overflow-y: scroll;
+  -webkit-transition: right 1s, height 1s;
+}
+
+#searchAid.off {
+  right: -306px;
+  height: 48px;
+
 }
 
 #searchAid h1 {

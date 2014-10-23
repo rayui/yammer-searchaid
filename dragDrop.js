@@ -38,6 +38,8 @@
       postMessage(href);
     }
 
+    yam.$('#searchAid').removeClass('shown');
+
   };
 
   var truncateTitle = function(title) {

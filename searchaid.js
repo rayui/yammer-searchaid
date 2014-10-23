@@ -30,15 +30,22 @@
 	var createLink = function(data) {
 		if ($sidebarEl && $sidebarEl.length) {
 			var type = data.type ? data.type : 'other';
-			var $el = $('<li class="link"><span><a href="' + data.href + '">' + data.title + '</a></span></li>')
+			var $ul = $sidebarEl.find('.links-list.links-' + type);
+			var $el = $('<li class="link"><span><a href="' + data.href + '">' + data.title + '</a></span></li>');
+
+			$ul.append($el);
+			$ul.find('.links-list-cta').remove();
 			$el.click(sendMessageToYammer);
-			$sidebarEl.find('.links-list.links-' + type).append($el);
 		}
 	};
 
 	var storeLink = function(data) {
 		var store = {};
-		store[data.title.replace(/\W+/g, "_")] = data;
+		var replace = false;
+		var key = data.title.replace(/\W+/g, "_");
+
+		store[key] = data;
+
 		chrome.storage.sync.set(store);
 	};
 
@@ -115,7 +122,8 @@
 				id: DIVID,
 				ext_path: chrome.extension.getURL('')
 			}));
-			$sidebarEl.hide();
+			$sidebarEl.addClass('off');
+			$sidebarEl.click(toggleSidebar);
 			$('body').append($sidebarEl);
 			loadLinks();
 		});
@@ -126,11 +134,7 @@
 		//only attempt toggle if sidebar exists
 		if(!$sidebarEl || $sidebarEl.length === 0) return;
 
-		if($sidebarEl.css('display') === 'none') {
-			$sidebarEl.show();
-		} else {
-			$sidebarEl.hide();
-		}
+		$sidebarEl.toggleClass('off');
 	};
 
 	var start = function(key) {
@@ -139,13 +143,10 @@
 			injectScripts();
 			addPostMessageListener();
 			createSidebar();
-			//addDroppables();
 		}
-
-		toggleSidebar();
-
 	};
 
-	chrome.runtime.onMessage.addListener(start);
+	start();
+	chrome.runtime.onMessage.addListener(toggleSidebar);
 
 })(window);
