@@ -4,16 +4,38 @@
   var port = chrome.runtime.connect();
   var $sidebarEl;
 
-  context.addEventListener("message", function(event) {
-    // We only accept messages from ourselves
-    if (event.source != context) return;
-    if (event.data.type && (event.data.type == "FROM_PAGE")) {
-    	if ($sidebarEl.length) {
-    		var $el = $('<div class="link"><span>' + event.data.text + '</span></div>')
-    		$sidebarEl.append($el);
-    	}
-    }
-  }, false);
+  var addPostMessageListener = function() {
+	  context.addEventListener("message", function(event) {
+	    // We only accept messages from ourselves
+	    if (event.source != context) return;
+	    if (event.data.type && (event.data.type == "FROM_PAGE")) {
+	    	var data = parseDataString(event.data.text);
+				if ($sidebarEl.length) {
+					var $el = $('<div class="link"><span><a href="' + data.href + '">' + data.title + '</a></span></div>')
+					$el.click(sendMessageToYammer);
+					$sidebarEl.append($el);
+				}
+			}
+	  }, false);
+	};
+
+  var parseDataString = function(strData) {
+    return JSON.parse(strData);
+  };
+
+  var createDataString = function(href, title) {
+    return JSON.stringify({
+      href: href,
+      title: title
+    });
+  };
+
+  var sendMessageToYammer = function(event) {
+		event.preventDefault();
+		var target = $(event.currentTarget).find('a');
+		var strInfo = createDataString(target.attr('href'), target.text());
+		window.postMessage({ type: "FROM_SIDEBAR", strData: strInfo}, "*");
+  };
 
 	var injectScript = function() {
 		var s = document.createElement('script');
@@ -22,11 +44,11 @@
 		s = document.createElement('script');
 		s.src = chrome.extension.getURL('dragDrop.js');
 		(document.head||document.documentElement).appendChild(s);
-	}
+	};
 
 	var getDivSelector = function() {
 		return '#' + divId;
-	}
+	};
 
 	var addDroppables = function() {
 		var links = $('body a');
@@ -34,7 +56,7 @@
 			draggable: true,
 			ondragstart: 'onDrag(event)'
 		});
-	}
+	};
 
 	var toggleSidebar = function() {
 		$sidebarEl = $(getDivSelector());
@@ -60,19 +82,20 @@
 
 			$('body').append($sidebarEl);
 		}
-	}
+	};
 
 	var getAppKey = function(key) {
 		appKey = key;
 		//appKey && chrome.runtime.sendMessage(appKey, {data: 'hi'});
-	}
+	};
 
 	var start = function(key) {
 		appKey = key;
 		injectScript();
+		addPostMessageListener();
 		toggleSidebar();
 		addDroppables();
-	}
+	};
 
 	chrome.runtime.onMessage.addListener(start);
 

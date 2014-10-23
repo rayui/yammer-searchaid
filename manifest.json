@@ -18,7 +18,7 @@
 	},
 	"background": {
 		"scripts": ["main.js", "vendor/underscore.js", "vendor/mustache.min.js", "vendor/jquery-1.11.1.min.js"],
-		"persistent": false
+		"persistent": true
 	},
 	"content_scripts": [{
 		"js": ["vendor/underscore.js", "vendor/mustache.min.js", "vendor/jquery-1.11.1.min.js"],
