@@ -25,7 +25,7 @@
 		"matches": ["https://www.yammer.com/*"],
 		"css": ["searchAid.css"]
 	}],
-	"web_accessible_resources" : ["dragDrop.js", "sidebar.html", "searchAid.css", "yammer-search-aid-logo-48.png"],
+	"web_accessible_resources" : ["dragDrop.js", "sidebar.html", "searchAid.css", "yammer-search-aid-logo-48.png", "spinner.gif"],
 	"permissions": [
 	 	"activeTab",
 		"tabs",

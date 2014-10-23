@@ -7,11 +7,19 @@
 
   var addPostMessageListener = function() {
 	  context.addEventListener("message", function(event) {
-	    if (event.source != context) return;
-	    if (event.data.type && (event.data.type == "FROM_PAGE")) {
-				var data = parseDataString(event.data.text);
-				storeLink(data);
-				createLink(data);
+	  	if (event.source != context) return;
+
+	  	if (event.data.type) {
+	    	if (event.data.type === "FROM_PAGE") {
+					var data = parseDataString(event.data.text);
+					storeLink(data);
+					var $h2 = $sidebarEl.find('.title-' + data.type);
+					$h2.removeClass('waiting');
+					createLink(data);
+				} else if (event.data.type === "WAITING") {
+					var $h2 = $sidebarEl.find('.title-' + event.data.text);
+					$h2.addClass('waiting');
+				}
 			}
 	  }, false);
 	};

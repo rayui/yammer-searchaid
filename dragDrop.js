@@ -19,6 +19,8 @@
     var type = detectContentType(href);
     var title;
 
+    window.postMessage({ type: "WAITING", text: type }, "*");
+
     if (type === 'thread') {
       getThreadInfo(href, function(messageData) {
         title = truncateTitle(messageData.body.plain);
