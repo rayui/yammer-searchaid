@@ -9,8 +9,7 @@
     // We only accept messages from ourselves
     if (event.source != context) return;
     if (event.data.type && (event.data.type === MSG_NAVIGATE)) {
-      var data = parseDataString(event.data.strData);
-      window.location = data.href;
+      this.location = event.data.strData;
     }
   }, false);
 
@@ -24,7 +23,7 @@
 
   context.trashDrop = function(event) {
     event.preventDefault();
-    window.postMessage({ type: MSG_TRASH, text: event.dataTransfer.getData('text') }, "*");
+    this.postMessage({ type: MSG_TRASH, text: event.dataTransfer.getData('text') }, "*");
   };
 
   context.addLinkToSidebar = function(event) {
@@ -33,7 +32,7 @@
     var type = detectContentType(href);
     var title;
 
-    window.postMessage({ type: MSG_WAITING, text: type }, "*");
+    this.postMessage({ type: MSG_WAITING, text: type }, "*");
 
     switch (type) {
       case 'thread':
@@ -67,14 +66,11 @@
           postLinkObject(href, title, type);
         });
     }
-
-    yam.$('#searchAid').addClass('off');
-
   };
 
   var postLinkObject = function(href, title, type) {
     var strData = createDataString(href, truncateTitle(title), type);
-    window.postMessage({ type: MSG_NEW_LINK, text: strData }, "*");
+    context.postMessage({ type: MSG_NEW_LINK, text: strData }, "*");
   }
 
   var truncateTitle = function(title) {
@@ -125,11 +121,6 @@
       }
     });
   }
-
-  var parseDataString = function(strData) {
-    data = JSON.parse(strData);
-    return data;
-  };
 
   var createDataString = function(href, title, type) {
     return JSON.stringify({

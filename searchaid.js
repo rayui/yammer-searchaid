@@ -7,6 +7,8 @@
 	var MSG_TRASH = 'TRASH';
 	var MSG_NAVIGATE = 'NAVIGATE';
 
+	//Utilities
+
 	var guid = function() {
 		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
 		    var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
@@ -14,28 +16,24 @@
 		});
 	}
 
-	var addPostMessageListener = function() {
-		context.addEventListener("message", function(event) {
-			event.preventDefault();
+	//Scripts and templates
 
-			if (event.source != context) return;
+	var injectScripts = function() {
 
-			if (event.data.type) {
-				if (event.data.type === MSG_NEW_LINK) {
-					var data = parseDataString(event.data.text);
-					var key = storeLink(data);
-					var $h2 = $sidebarEl.find('.title-' + data.type);
-					$h2.removeClass('waiting');
-					createLink(data, key);
-				} else if (event.data.type === MSG_WAITING) {
-					var $h2 = $sidebarEl.find('.title-' + event.data.text);
-					$h2.addClass('waiting');
-				} else if (event.data.type === MSG_TRASH) {
-					var key = event.data.text;
-					removeLink(key);
-				}
-			}
-		}, false);
+		var addChild = function(el) {
+			(document.head||document.documentElement).appendChild(el);
+		}
+
+		var dragDrop = document.createElement('script');
+		dragDrop.src = chrome.extension.getURL('dragDrop.js');
+		addChild(dragDrop);
+
+		var styles = document.createElement('link');
+		styles.href = chrome.extension.getURL('searchAid.css');
+		styles.media = 'screen, projection';
+		styles.rel = 'stylesheet';
+		styles.type = 'text/css';
+		addChild(styles);
 	};
 
 	var getTemplate = function(path, callback) {
@@ -47,48 +45,14 @@
 		};
 		xhr.open("GET", chrome.extension.getURL(path), true);
 		xhr.send();
-	}
-
-	var createLink = function(data, key) {
-		if ($sidebarEl && $sidebarEl.length) {
-			var type = data.type ? data.type : 'other';
-			var $ul = $sidebarEl.find('.links-list.links-' + type);
-			var $el = $('<li class="link"><span><a ondragstart="listItemDrag(event)" data-key=' + key + ' href="' + data.href + '">' + data.title + '</a></span></li>');
-
-			$ul.append($el);
-			$ul.find('.links-list-cta').remove();
-			$el.click(sendMessageToYammer);
-		}
 	};
 
-	var removeLink = function(key) {
-		var $link = $sidebarEl.find('a[data-key="' + key + '"]');
-		$link.parent().remove();
-		chrome.storage.sync.remove(key);
-		return false;
-	}
+	//Message data utilities
 
-	var getKeyFromTitle = function(title) {
-		return title.replace(/\W+/g, "_");
-	}
-
-	var storeLink = function(data) {
-		var store = {};
-		var replace = false;
-		var key = guid(); //getKeyFromTitle(data.title);
-
-		store[key] = data;
-
-		chrome.storage.sync.set(store);
-
-		return key;
-	};
-
-	var loadLinks = function() {
-		chrome.storage.sync.get(null, function(keys) {
-			for (key in keys) {
-				createLink(keys[key], key);
-			}
+	var createDataString = function(href, title) {
+		return JSON.stringify({
+			href: href,
+			title: title
 		});
 	};
 
@@ -107,43 +71,76 @@
 		return data;
 	};
 
-	var createDataString = function(href, title) {
-		return JSON.stringify({
-			href: href,
-			title: title
-		});
-	};
+	//Event handling
 
 	var sendMessageToYammer = function(event) {
 		event.preventDefault();
-		var target = $(event.currentTarget).find('a');
-		var strInfo = createDataString(target.attr('href'), target.text());
-		window.postMessage({ type: MSG_NAVIGATE, strData: strInfo}, "*");
+		context.postMessage({ type: MSG_NAVIGATE, strData: event.currentTarget.attributes.href.value}, "*");
 	};
 
-	var injectScripts = function() {
-		s = document.createElement('script');
-		s.src = chrome.extension.getURL('dragDrop.js');
-		(document.head||document.documentElement).appendChild(s);
-		s = document.createElement('link');
-		s.href = chrome.extension.getURL('searchAid.css');
-		s.media = 'screen, projection';
-		s.rel = 'stylesheet';
-		s.type = 'text/css';
-		(document.head||document.documentElement).appendChild(s);
+	var listenToYammer = function() {
+		context.addEventListener("message", function(event) {
+			event.preventDefault();
+
+			if (event.source != context) return;
+
+			if (event.data.type) {
+				if (event.data.type === MSG_NEW_LINK) {
+					var data = parseDataString(event.data.text);
+					var key = guid();
+					var $h2 = $sidebarEl.find('.title-' + data.type);
+					
+					storeLink(key, data);
+					createLink(key, data);
+					$h2.removeClass('waiting');
+				} else if (event.data.type === MSG_WAITING) {
+					var $h2 = $sidebarEl.find('.title-' + event.data.text);
+					$h2.addClass('waiting');
+				} else if (event.data.type === MSG_TRASH) {
+					var key = event.data.text;
+					removeLink(key);
+				}
+			}
+		}, false);
 	};
 
-	var getDivSelector = function() {
-		return '#' + DIVID;
+	//Link management
+
+	var createLink = function(key, data) {
+		if ($sidebarEl && $sidebarEl.length) {
+			var type = data.type ? data.type : 'other';
+			var $ul = $sidebarEl.find('.links-list.links-' + type);
+			var $el = $('<li class="link"><span><a ondragstart="listItemDrag(event)" data-key=' + key + ' href="' + data.href + '">' + data.title + '</a></span></li>');
+
+			$ul.append($el);
+			$ul.find('.links-list-cta').remove();
+			$el.find('a').click(sendMessageToYammer);
+		}
 	};
 
-	var addDroppables = function() {
-		var links = $('body a');
-		links.attr({
-			draggable: true,
-			ondragstart: 'onDrag(event)'
+	var removeLink = function(key) {
+		var $link = $sidebarEl.find('a[data-key="' + key + '"]');
+		$link.parent().remove();
+		chrome.storage.sync.remove(key);
+		return false;
+	}
+
+	var storeLink = function(key, data) {
+		var store = {};
+		
+		store[key] = data;
+		chrome.storage.sync.set(store);
+	};
+
+	var loadLinks = function() {
+		chrome.storage.sync.get(null, function(keys) {
+			for (key in keys) {
+				createLink(key, keys[key]);
+			}
 		});
 	};
+
+	//Sidebar handlers
 
 	var hasSidebar = function() {
 		var $el = $('#searchAid');
@@ -172,7 +169,7 @@
 
 	if(!hasSidebar()) {
 		injectScripts();
-		addPostMessageListener();
+		listenToYammer();
 		createSidebar();
 		chrome.runtime.onMessage.addListener(toggleSidebar);
 	}

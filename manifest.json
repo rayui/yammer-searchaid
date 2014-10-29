@@ -17,7 +17,7 @@
 		"default_title": "Yammer SearchAid"
 	},
 	"background": {
-		"scripts": ["main.js", "vendor/underscore.js", "vendor/mustache.min.js", "vendor/jquery-1.11.1.min.js"],
+		"scripts": ["main.js"],
 		"persistent": false
 	},
 	"content_scripts": [{

@@ -9,8 +9,8 @@
   z-index: 999999;
   background: #ffffff url('yammer-search-aid-logo-48.png') no-repeat 20px 20px;
   padding: 20px;
-  overflow-y: scroll;
-  -webkit-transition: right 1s, height 1s, padding 1s, background-position 1s;
+  overflow-y: auto;
+  -webkit-transition: right linear 0.5s, height ease-in 0.5s, padding 0.5s, background-position 0.5s;
 }
 
 #searchAid.off {
@@ -18,15 +18,18 @@
   height: 48px;
   padding: 0;
   background-position: 0 0;
+  -webkit-transition: right linear 0.5s, height ease-out 0.5s, padding 0.5s, background-position 0.5s;
 }
 
 #searchAid div {
   opacity: 1;
-  -webkit-transition: opacity 1s;
+  -webkit-transition: opacity 0.2s;
+  -webkit-transition-delay: 0.3s;
 }
 
 #searchAid.off div {
   opacity: 0;
+  -webkit-transition-delay: 0s;
 }
 
 #searchAid h1 {
@@ -46,7 +49,8 @@
   margin:0;
   padding: 10px;
   display:block;
-  background-color:#cecece;
+  border: 1px solid #EAEAEA;
+  border-radius: 1px;
 }
 
 #searchAid .links-list li {
@@ -59,7 +63,7 @@
   display:block;
   float:right;
   margin: 20px 0 0 0;
-  width:16px;
+  width:100%;
   height:16px;
-  background: transparent url('trash.png') no-repeat 0 0;
+  background: transparent url('trash.png') no-repeat 100% 0;
 }
