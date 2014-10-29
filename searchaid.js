@@ -49,13 +49,6 @@
 
 	//Message data utilities
 
-	var createDataString = function(href, title) {
-		return JSON.stringify({
-			href: href,
-			title: title
-		});
-	};
-
 	var parseDataString = function(strData) {
 		var data;
 
@@ -161,18 +154,14 @@
 	}
 
 	var toggleSidebar = function() {
-		//only attempt toggle if sidebar exists
-		if(!hasSidebar()) return;
-
 		$sidebarEl.toggleClass('off');
 	};
 
 	if(!hasSidebar()) {
 		injectScripts();
-		listenToYammer();
 		createSidebar();
+		listenToYammer();
 		chrome.runtime.onMessage.addListener(toggleSidebar);
-	}
-	
+	}	
 
 })(window);
