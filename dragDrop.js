@@ -4,6 +4,7 @@
   var MSG_WAITING = 'WAITING';
   var MSG_TRASH = 'TRASH';
   var MSG_NAVIGATE = 'NAVIGATE';
+  var MSG_TAG_POSITION = 'TAG_POSITION';
 
   context.addEventListener("message", function(event) {
     // We only accept messages from ourselves
@@ -66,6 +67,15 @@
           postLinkObject(href, title, type);
         });
     }
+  };
+
+  context.changeTagPosition = function(event) {
+    event.target.parentElement.style.top = event.y + 'px';
+  };
+
+  context.storeTagPosition = function(event) {
+    context.changeTagPosition(event);
+    context.postMessage({ type: MSG_TAG_POSITION, text: event.y }, "*");
   };
 
   var postLinkObject = function(href, title, type) {

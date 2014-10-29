@@ -1,23 +1,25 @@
 <div class="{{master-class}}">
-  <div class="{{master-class}}--drag-target"></div>
-  <div ondragover="allowDrop(event)" ondrop="addLinkToSidebar(event)">
-    <h1>Yammer SearchAid</h1>
-    <h2 class="{{master-class}}--title {{master-class}}--title-people">My People</h2>
-    <ul class="{{master-class}}--links-list links-user">
-      <li class="{{master-class}}--links-list-cta">Drop links here to save!</li>
-    </ul>
-    <h2 class="{{master-class}}--title {{master-class}}--title-group">My Groups</h2>
-    <ul class="{{master-class}}--links-list {{master-class}}--links-group">
-      <li class="{{master-class}}--links-list-cta">Drop links here to save!</li>
-    </ul>
-    <h2 class="{{master-class}}--title {{master-class}}--title-thread">My Threads</h2>
-    <ul class="{{master-class}}--links-list {{master-class}}--links-thread">
-      <li class="{{master-class}}--links-list-cta">Drop links here to save!</li>
-    </ul>
-    <h2 class="{{master-class}}--title {{master-class}}--title-other">My Scrapbook</h2>
-    <ul class="{{master-class}}--links-list {{master-class}}--links-other">
-      <li class="{{master-class}}--links-list-cta">Drop links here to save!</li>
-    </ul>
+  <a class="{{master-class}}--drag-target" href="#" ondrag="changeTagPosition(event)" ondragend="storeTagPosition(event)"></a>
+  <div class="{{master-class}}--interactive">
+    <div ondragover="allowDrop(event)" ondrop="addLinkToSidebar(event)">
+      <h1>Yammer SearchAid</h1>
+      <h2 class="{{master-class}}--title {{master-class}}--title-people">My People</h2>
+      <ul class="{{master-class}}--links-list links-user">
+        <li class="{{master-class}}--links-list-cta">Drop links here to save!</li>
+      </ul>
+      <h2 class="{{master-class}}--title {{master-class}}--title-group">My Groups</h2>
+      <ul class="{{master-class}}--links-list {{master-class}}--links-group">
+        <li class="{{master-class}}--links-list-cta">Drop links here to save!</li>
+      </ul>
+      <h2 class="{{master-class}}--title {{master-class}}--title-thread">My Threads</h2>
+      <ul class="{{master-class}}--links-list {{master-class}}--links-thread">
+        <li class="{{master-class}}--links-list-cta">Drop links here to save!</li>
+      </ul>
+      <h2 class="{{master-class}}--title {{master-class}}--title-other">My Scrapbook</h2>
+      <ul class="{{master-class}}--links-list {{master-class}}--links-other">
+        <li class="{{master-class}}--links-list-cta">Drop links here to save!</li>
+      </ul>
+    </div>
+    <div class="{{master-class}}--trash" ondragover="allowDrop(event)" ondrop="trashDrop(event)"></div>
   </div>
-  <div class="{{master-class}}--trash" ondragover="allowDrop(event)" ondrop="trashDrop(event)"></div>
 </div>

@@ -5,6 +5,7 @@
 	var MSG_WAITING = 'WAITING';
 	var MSG_TRASH = 'TRASH';
 	var MSG_NAVIGATE = 'NAVIGATE';
+	var MSG_TAG_POSITION = 'TAG_POSITION';
 
 	var $sidebarEl;
 
@@ -94,6 +95,10 @@
 					var key = event.data.text;
 					removeLink(key);
 				}
+				else if (event.data.type === MSG_TAG_POSITION) {
+					var top = event.data.text;
+					storeTagPosition(top);
+				}
 			}
 		}, false);
 	};
@@ -157,6 +162,16 @@
 			}));
 			$sidebarEl.addClass(DIV_CLASS + '--off');
 			$sidebarEl.click(toggleSidebar);
+
+			chrome.storage.sync.get(DIV_CLASS, function(data) {
+				var top;
+
+				top = data['search-aid'] && data['search-aid']['tag-top'] ?
+					data['search-aid']['tag-top'] : 0;
+					
+				$sidebarEl.offset({top: top});
+			});
+
 			$('body').append($sidebarEl);
 			loadLinks();
 		});
@@ -164,7 +179,22 @@
 
 	var toggleSidebar = function() {
 		$sidebarEl.toggleClass(DIV_CLASS + '--off');
+		if (!$sidebarEl.hasClass(DIV_CLASS + '--off')) {
+			$sidebarEl.offset({top: 0});
+		} else {
+			chrome.storage.sync.get(DIV_CLASS, function(data) {
+				var top = data['search-aid']['tag-top'] || 0;
+				$sidebarEl.offset({top: top});
+			});
+		}
 	};
+
+	var storeTagPosition = function(top) {
+		var store = {};
+		
+		store[DIV_CLASS] = {'tag-top': top};
+		chrome.storage.sync.set(store);
+	}
 
 	if(!hasSidebar()) {
 		injectScripts();

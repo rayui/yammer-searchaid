@@ -1,33 +1,43 @@
 .search-aid {
   position: fixed;
-  top: 0px;
   right: 0px;
   width: 350px;
   height: 100%;
   box-shadow: black 0px 0px 1em;
-  border-radius: 0 0 0 .5em;
+  border-radius: 0.5em 0 0 .5em;
   z-index: 999999;
   background: #ffffff url('yammer-search-aid-logo-48.png') no-repeat 20px 20px;
   padding: 20px;
+  overflow-x: hidden;
   overflow-y: auto;
-  -webkit-transition: right linear 0.5s, height ease-in 0.5s, padding 0.5s, background-position 0.5s;
+  -webkit-transition: top 0.5s, width 0.5s, right linear 0.5s, height ease-in 0.5s, padding 0.5s, background-position 0.5s;
 }
 
 .search-aid.search-aid--off {
-  right: -306px;
+  width: 48px;
   height: 48px;
   padding: 4px 6px 1px 6px;
   background-position: 4px 2px;
-  -webkit-transition: right linear 0.5s, height ease-out 0.5s, padding 0.5s, background-position 0.5s;
+  overflow: hidden;
+  -webkit-transition: top 0.5s, width 0.5s, right linear 0.5s, height ease-out 0.5s, padding 0.5s, background-position 0.5s;
 }
 
-.search-aid div {
+.search-aid .search-aid--drag-target {
+  position:absolute;
+  top: 0;
+  left: 0;
+  width: 80px;
+  height: 53px;
+  z-index:100;
+}
+
+.search-aid .search-aid--interactive {
   opacity: 1;
   -webkit-transition: opacity 0.2s;
   -webkit-transition-delay: 0.3s;
 }
 
-.search-aid.search-aid--off div {
+.search-aid.search-aid--off .search-aid--interactive {
   opacity: 0;
   -webkit-transition-delay: 0s;
 }
