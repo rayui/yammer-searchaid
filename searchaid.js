@@ -1,8 +1,11 @@
 (function(context) {
-	var DIVID = "searchAid"
-	var SIDEBAR_TEMPLATE = "sidebar.html"
-	var port = chrome.runtime.connect();
+	var DIVID = "searchAid";
+	var SIDEBAR_TEMPLATE = "sidebar.html";
 	var $sidebarEl;
+	var MSG_NEW_LINK = 'NEW_LINK';
+	var MSG_WAITING = 'WAITING';
+	var MSG_TRASH = 'TRASH';
+	var MSG_NAVIGATE = 'NAVIGATE';
 
 	var guid = function() {
 		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -18,16 +21,16 @@
 			if (event.source != context) return;
 
 			if (event.data.type) {
-				if (event.data.type === "NEW_LINK") {
+				if (event.data.type === MSG_NEW_LINK) {
 					var data = parseDataString(event.data.text);
 					var key = storeLink(data);
 					var $h2 = $sidebarEl.find('.title-' + data.type);
 					$h2.removeClass('waiting');
 					createLink(data, key);
-				} else if (event.data.type === "WAITING") {
+				} else if (event.data.type === MSG_WAITING) {
 					var $h2 = $sidebarEl.find('.title-' + event.data.text);
 					$h2.addClass('waiting');
-				} else if (event.data.type === "TRASH") {
+				} else if (event.data.type === MSG_TRASH) {
 					var key = event.data.text;
 					removeLink(key);
 				}
@@ -115,7 +118,7 @@
 		event.preventDefault();
 		var target = $(event.currentTarget).find('a');
 		var strInfo = createDataString(target.attr('href'), target.text());
-		window.postMessage({ type: "NAVIGATE", strData: strInfo}, "*");
+		window.postMessage({ type: MSG_NAVIGATE, strData: strInfo}, "*");
 	};
 
 	var injectScripts = function() {
@@ -148,9 +151,6 @@
 	}
 
 	var createSidebar = function() {
-		//don't recreate sidebar
-		if(hasSidebar()) return;
-
 		getTemplate(SIDEBAR_TEMPLATE, function(template) {
 			$sidebarEl = $(Mustache.to_html(template, {
 				id: DIVID,
@@ -161,7 +161,6 @@
 			$('body').append($sidebarEl);
 			loadLinks();
 		});
-
 	}
 
 	var toggleSidebar = function() {

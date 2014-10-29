@@ -4,18 +4,29 @@
   right: 0px;
   width: 350px;
   height: 100%;
-  box-shadow: black 0px 0px 1em inset;
+  box-shadow: black 0px 0px 1em;
+  border-radius: 0 0 0 1em;
   z-index: 999999;
-  background: #ececec url('yammer-search-aid-logo-48.png') no-repeat 20px 20px;
+  background: #ffffff url('yammer-search-aid-logo-48.png') no-repeat 20px 20px;
   padding: 20px;
   overflow-y: scroll;
-  -webkit-transition: right 1s, height 1s;
+  -webkit-transition: right 1s, height 1s, padding 1s, background-position 1s;
 }
 
 #searchAid.off {
   right: -306px;
   height: 48px;
+  padding: 0;
+  background-position: 0 0;
+}
 
+#searchAid div {
+  opacity: 1;
+  -webkit-transition: opacity 1s;
+}
+
+#searchAid.off div {
+  opacity: 0;
 }
 
 #searchAid h1 {
@@ -35,7 +46,7 @@
   margin:0;
   padding: 10px;
   display:block;
-  background-color:#fff;
+  background-color:#cecece;
 }
 
 #searchAid .links-list li {

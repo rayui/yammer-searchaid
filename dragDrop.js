@@ -1,9 +1,14 @@
 (function(context) {
 
+  var MSG_NEW_LINK = 'NEW_LINK';
+  var MSG_WAITING = 'WAITING';
+  var MSG_TRASH = 'TRASH';
+  var MSG_NAVIGATE = 'NAVIGATE';
+
   context.addEventListener("message", function(event) {
     // We only accept messages from ourselves
     if (event.source != context) return;
-    if (event.data.type && (event.data.type == "NAVIGATE")) {
+    if (event.data.type && (event.data.type === MSG_NAVIGATE)) {
       var data = parseDataString(event.data.strData);
       window.location = data.href;
     }
@@ -19,16 +24,16 @@
 
   context.trashDrop = function(event) {
     event.preventDefault();
-    window.postMessage({ type: "TRASH", text: event.dataTransfer.getData('text') }, "*");
+    window.postMessage({ type: MSG_TRASH, text: event.dataTransfer.getData('text') }, "*");
   };
 
-  context.sidebarDrop = function(event) {
+  context.addLinkToSidebar = function(event) {
     event.preventDefault();
     var href = event.dataTransfer.getData('text');
     var type = detectContentType(href);
     var title;
 
-    window.postMessage({ type: "WAITING", text: type }, "*");
+    window.postMessage({ type: MSG_WAITING, text: type }, "*");
 
     switch (type) {
       case 'thread':
@@ -56,20 +61,20 @@
         break;
       default:
         getHTMLPage(href, function(data) {
-          var titleStart = otherData.indexOf('<title>') + 7;
-          var titleLength = otherData.indexOf('</title>') - titleStart - 5;
-          var title = otherData.substr(titleStart, titleLength).trim();
+          var titleStart = data.indexOf('<title>') + 7;
+          var titleLength = data.indexOf('</title>') - titleStart - 5;
+          var title = data.substr(titleStart, titleLength).trim();
           postLinkObject(href, title, type);
         });
     }
 
-    yam.$('#searchAid').removeClass('shown');
+    yam.$('#searchAid').addClass('off');
 
   };
 
   var postLinkObject = function(href, title, type) {
     var strData = createDataString(href, truncateTitle(title), type);
-    window.postMessage({ type: "NEW_LINK", text: strData }, "*");
+    window.postMessage({ type: MSG_NEW_LINK, text: strData }, "*");
   }
 
   var truncateTitle = function(title) {
