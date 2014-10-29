@@ -3,7 +3,7 @@
   context.addEventListener("message", function(event) {
     // We only accept messages from ourselves
     if (event.source != context) return;
-    if (event.data.type && (event.data.type == "FROM_SIDEBAR")) {
+    if (event.data.type && (event.data.type == "NAVIGATE")) {
       var data = parseDataString(event.data.strData);
       window.location = data.href;
     }
@@ -13,13 +13,16 @@
     event.preventDefault();
   };
 
+  context.listItemDrag = function(event) {
+    event.dataTransfer.setData("text", event.target.attributes['data-key'].value);
+  }
+
   context.trashDrop = function(event) {
     event.preventDefault();
-    var href = event.dataTransfer.getData('text');
-    window.postMessage({ type: "TRASH", text: href }, "*");
+    window.postMessage({ type: "TRASH", text: event.dataTransfer.getData('text') }, "*");
   };
 
-  context.onDrop = function(event) {
+  context.sidebarDrop = function(event) {
     event.preventDefault();
     var href = event.dataTransfer.getData('text');
     var type = detectContentType(href);
@@ -27,43 +30,53 @@
 
     window.postMessage({ type: "WAITING", text: type }, "*");
 
-    if (type === 'thread') {
-      getThreadInfo(href, function(messageData) {
-        title = truncateTitle(messageData.body.plain);
-        postMessage(createDataString(href, title, type));
-      });
-    } else if (type === 'group') {
-      getGroupInfo(href, function(groupData) {
-        title = truncateTitle(groupData.full_name);
-        postMessage(createDataString(href, title, type));
-      });
-    } else if (type === 'user') {
-      getUserInfo(href, function(userData) {
-        title = truncateTitle(userData.full_name);
-        postMessage(createDataString(href, title, type));
-      });
-    } else {
-      getOtherInfo(href, function(otherData) {
-        var titleStart = otherData.indexOf('<title>') + 7;
-        var titleLength = otherData.indexOf('</title>') - titleStart - 5;
-        var title = otherData.substr(titleStart, titleLength).trim();
-        postMessage(createDataString(href, title, type));
-      });
+    switch (type) {
+      case 'thread':
+        getAPIParam(href, new RegExp(/threadId=(\d+)/), function(match) {
+          makeAPIRequest('threads', match, function(threadInfo) {
+            makeAPIRequest('messages', threadInfo.thread_starter_id, function(messageData) {
+              postLinkObject(href, messageData.body.plain, type);
+            });
+          });
+        });
+        break;
+      case 'group':
+        getAPIParam(href, new RegExp(/type=in_group&feedId=(\d+)/), function(match) {
+          makeAPIRequest('groups', match, function(groupData) {
+            postLinkObject(href, groupData.full_name, type);
+          });
+        });
+        break;
+      case 'user':
+        getAPIParam(href, new RegExp(/users\/(\w+)/), function(match) {
+          makeAPIRequest('users', match, function(userData) {
+            postLinkObject(href, userData.full_name, type);
+          });
+        });
+        break;
+      default:
+        getHTMLPage(href, function(data) {
+          var titleStart = otherData.indexOf('<title>') + 7;
+          var titleLength = otherData.indexOf('</title>') - titleStart - 5;
+          var title = otherData.substr(titleStart, titleLength).trim();
+          postLinkObject(href, title, type);
+        });
     }
 
     yam.$('#searchAid').removeClass('shown');
 
   };
 
+  var postLinkObject = function(href, title, type) {
+    var strData = createDataString(href, truncateTitle(title), type);
+    window.postMessage({ type: "NEW_LINK", text: strData }, "*");
+  }
+
   var truncateTitle = function(title) {
     if (title.length > 64) {
       return title.substr(0,64) + '...';
     }
     return title;
-  }
-
-  var postMessage = function(strData) {
-    window.postMessage({ type: "FROM_PAGE", text: strData }, "*");
   }
 
   var detectContentType = function(href) {
@@ -77,32 +90,14 @@
     return 'other';
   };
 
-  var getThreadInfo = function(href, cb) {
-    var matches = new RegExp(/threadId=(\d+)/).exec(href);
+  var getAPIParam = function(href, regex, cb) {
+    var matches = new RegExp(regex).exec(href);
     if (matches[1]) {
-      makeRequest('threads', matches[1], function(threadInfo) {
-        makeRequest('messages', threadInfo.thread_starter_id, cb);
-      });
+      cb(matches[1]);
     }
-  };
+  }
 
-  var getGroupInfo = function(href, cb) {
-    var matches = new RegExp(/type=in_group&feedId=(\d+)/).exec(href);
-    if (matches[1]) {
-      if (matches[1]) {
-        makeRequest('groups', matches[1], cb);
-      }
-    }
-  };
-
-  var getUserInfo = function(href, cb) {
-    var matches = new RegExp(/users\/(\w+)/).exec(href);
-    if (matches[1]) {
-      makeRequest('users', matches[1], cb);
-    }
-  };
-
-  var getOtherInfo = function(href, cb) {
+  var getHTMLPage = function(href, cb) {
     yam.request({
       url: href,
       type: 'GET',
@@ -114,7 +109,7 @@
     })
   }
 
-  var makeRequest = function(apiName, param, cb) {
+  var makeAPIRequest = function(apiName, param, cb) {
     yam.request({
       url:yam.uri.api() + '/' + apiName + '/' + param,
       type: 'GET',

@@ -1,18 +1,24 @@
 (function(context) {
-	var appKey;
 	var DIVID = "searchAid"
 	var SIDEBAR_TEMPLATE = "sidebar.html"
-  var port = chrome.runtime.connect();
-  var $sidebarEl;
+	var port = chrome.runtime.connect();
+	var $sidebarEl;
 
-  var addPostMessageListener = function() {
-	  context.addEventListener("message", function(event) {
-	  	event.preventDefault();
+	var guid = function() {
+		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+		    var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+		    return v.toString(16);
+		});
+	}
 
-	  	if (event.source != context) return;
+	var addPostMessageListener = function() {
+		context.addEventListener("message", function(event) {
+			event.preventDefault();
 
-	  	if (event.data.type) {
-	    	if (event.data.type === "FROM_PAGE") {
+			if (event.source != context) return;
+
+			if (event.data.type) {
+				if (event.data.type === "NEW_LINK") {
 					var data = parseDataString(event.data.text);
 					var key = storeLink(data);
 					var $h2 = $sidebarEl.find('.title-' + data.type);
@@ -22,11 +28,11 @@
 					var $h2 = $sidebarEl.find('.title-' + event.data.text);
 					$h2.addClass('waiting');
 				} else if (event.data.type === "TRASH") {
-					var href = event.data.text;
-					removeLink(href);
+					var key = event.data.text;
+					removeLink(key);
 				}
 			}
-	  }, false);
+		}, false);
 	};
 
 	var getTemplate = function(path, callback) {
@@ -44,7 +50,7 @@
 		if ($sidebarEl && $sidebarEl.length) {
 			var type = data.type ? data.type : 'other';
 			var $ul = $sidebarEl.find('.links-list.links-' + type);
-			var $el = $('<li class="link"><span><a data-key=' + key + ' href="' + data.href + '">' + data.title + '</a></span></li>');
+			var $el = $('<li class="link"><span><a ondragstart="listItemDrag(event)" data-key=' + key + ' href="' + data.href + '">' + data.title + '</a></span></li>');
 
 			$ul.append($el);
 			$ul.find('.links-list-cta').remove();
@@ -52,9 +58,8 @@
 		}
 	};
 
-	var removeLink = function(href) {
-		var $link = $sidebarEl.find('a[href="' + href + '"]');
-		var key = $link.data('key');
+	var removeLink = function(key) {
+		var $link = $sidebarEl.find('a[data-key="' + key + '"]');
 		$link.parent().remove();
 		chrome.storage.sync.remove(key);
 		return false;
@@ -67,7 +72,7 @@
 	var storeLink = function(data) {
 		var store = {};
 		var replace = false;
-		var key = getKeyFromTitle(data.title);
+		var key = guid(); //getKeyFromTitle(data.title);
 
 		store[key] = data;
 
@@ -84,39 +89,36 @@
 		});
 	};
 
-  var parseDataString = function(strData) {
-  	var data;
+	var parseDataString = function(strData) {
+		var data;
 
-  	try {
-  		data = JSON.parse(strData);
-  	} catch (err) {
-  		data = {
-  			href: strData,
-  			title: strData
-  		}
-  	}
+		try {
+			data = JSON.parse(strData);
+		} catch (err) {
+			data = {
+				href: strData,
+				title: strData
+			}
+		}
 
-  	return data;
-  };
+		return data;
+	};
 
-  var createDataString = function(href, title) {
-    return JSON.stringify({
-      href: href,
-      title: title
-    });
-  };
+	var createDataString = function(href, title) {
+		return JSON.stringify({
+			href: href,
+			title: title
+		});
+	};
 
-  var sendMessageToYammer = function(event) {
+	var sendMessageToYammer = function(event) {
 		event.preventDefault();
 		var target = $(event.currentTarget).find('a');
 		var strInfo = createDataString(target.attr('href'), target.text());
-		window.postMessage({ type: "FROM_SIDEBAR", strData: strInfo}, "*");
-  };
+		window.postMessage({ type: "NAVIGATE", strData: strInfo}, "*");
+	};
 
 	var injectScripts = function() {
-		var s = document.createElement('script');
-		s.appendChild(document.createTextNode('window.yammerSearchAidKey="' + appKey + '";'));
-		(document.head||document.documentElement).appendChild(s);
 		s = document.createElement('script');
 		s.src = chrome.extension.getURL('dragDrop.js');
 		(document.head||document.documentElement).appendChild(s);
@@ -140,9 +142,14 @@
 		});
 	};
 
+	var hasSidebar = function() {
+		var $el = $('#searchAid');
+		return $el && $el.length > 0;
+	}
+
 	var createSidebar = function() {
 		//don't recreate sidebar
-		if($sidebarEl && $sidebarEl.length > 0) return;
+		if(hasSidebar()) return;
 
 		getTemplate(SIDEBAR_TEMPLATE, function(template) {
 			$sidebarEl = $(Mustache.to_html(template, {
@@ -159,21 +166,17 @@
 
 	var toggleSidebar = function() {
 		//only attempt toggle if sidebar exists
-		if(!$sidebarEl || $sidebarEl.length === 0) return;
+		if(!hasSidebar()) return;
 
 		$sidebarEl.toggleClass('off');
 	};
 
-	var start = function(key) {
-		appKey = key;
-		if(!$sidebarEl) {
-			injectScripts();
-			addPostMessageListener();
-			createSidebar();
-		}
-	};
-
-	start();
-	chrome.runtime.onMessage.addListener(toggleSidebar);
+	if(!hasSidebar()) {
+		injectScripts();
+		addPostMessageListener();
+		createSidebar();
+		chrome.runtime.onMessage.addListener(toggleSidebar);
+	}
+	
 
 })(window);

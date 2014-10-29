@@ -21,6 +21,7 @@ chrome.pageAction.onClicked.addListener(function(tab) {
 	}, 1);
 });
 
-chrome.webNavigation.onDOMContentLoaded.addListener(function(tab) {
+chrome.webNavigation.onCompleted.addListener(function(tab) {
+	//alert('here')
 	chrome.tabs.executeScript(tab.id, {file: "searchaid.js"});
 });
