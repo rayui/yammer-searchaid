@@ -82,14 +82,14 @@
 				if (event.data.type === MSG_NEW_LINK) {
 					var data = parseDataString(event.data.text);
 					var key = guid();
-					var $h2 = $sidebarEl.find('.' + DIV_CLASS + '--title-' + data.type);
+					var $title = $sidebarEl.find('.' + DIV_CLASS + '--title-' + data.type);
 					
 					storeLink(key, data);
 					createLink(key, data);
-					$h2.removeClass(DIV_CLASS + '--waiting');
+					$title.removeClass(DIV_CLASS + '--waiting');
 				} else if (event.data.type === MSG_WAITING) {
-					var $h2 = $sidebarEl.find('.' + DIV_CLASS + '--title-' + event.data.text);
-					$h2.addClass(DIV_CLASS + '--waiting');
+					var $title = $sidebarEl.find('.' + DIV_CLASS + '--title-' + event.data.text);
+					$title.addClass(DIV_CLASS + '--waiting');
 				} else if (event.data.type === MSG_TRASH) {
 					var key = event.data.text;
 					removeLink(key);
