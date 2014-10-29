@@ -152,7 +152,18 @@
 	var hasSidebar = function() {
 		var $el = $('.' + DIV_CLASS);
 		return $el && $el.length > 0;
-	}
+	};
+
+	var getandSetSavedPosition = function() {
+		chrome.storage.sync.get(DIV_CLASS, function(data) {
+			var top;
+
+			top = data['search-aid'] && data['search-aid']['tag-top'] ?
+				data['search-aid']['tag-top'] : 0;
+
+			$sidebarEl.offset({top: top});
+		});
+	};
 
 	var createSidebar = function() {
 		getTemplate(SIDEBAR_TEMPLATE, function(template) {
@@ -163,14 +174,7 @@
 			$sidebarEl.addClass(DIV_CLASS + '--off');
 			$sidebarEl.click(toggleSidebar);
 
-			chrome.storage.sync.get(DIV_CLASS, function(data) {
-				var top;
-
-				top = data['search-aid'] && data['search-aid']['tag-top'] ?
-					data['search-aid']['tag-top'] : 0;
-					
-				$sidebarEl.offset({top: top});
-			});
+			getandSetSavedPosition();
 
 			$('body').append($sidebarEl);
 			loadLinks();
@@ -182,10 +186,7 @@
 		if (!$sidebarEl.hasClass(DIV_CLASS + '--off')) {
 			$sidebarEl.offset({top: 0});
 		} else {
-			chrome.storage.sync.get(DIV_CLASS, function(data) {
-				var top = data['search-aid']['tag-top'] || 0;
-				$sidebarEl.offset({top: top});
-			});
+			getandSetSavedPosition();
 		}
 	};
 
