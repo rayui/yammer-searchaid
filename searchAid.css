@@ -5,7 +5,7 @@
   width: 350px;
   height: 100%;
   box-shadow: black 0px 0px 1em;
-  border-radius: 0 0 0 1em;
+  border-radius: 0 0 0 .5em;
   z-index: 999999;
   background: #ffffff url('yammer-search-aid-logo-48.png') no-repeat 20px 20px;
   padding: 20px;
@@ -16,8 +16,8 @@
 .search-aid.search-aid--off {
   right: -306px;
   height: 48px;
-  padding: 0;
-  background-position: 0 0;
+  padding: 4px 6px 1px 6px;
+  background-position: 4px 2px;
   -webkit-transition: right linear 0.5s, height ease-out 0.5s, padding 0.5s, background-position 0.5s;
 }
 
