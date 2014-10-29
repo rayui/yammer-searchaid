@@ -1,11 +1,12 @@
 (function(context) {
-	var DIVID = "searchAid";
+	var DIV_CLASS = "search-aid";
 	var SIDEBAR_TEMPLATE = "sidebar.html";
-	var $sidebarEl;
 	var MSG_NEW_LINK = 'NEW_LINK';
 	var MSG_WAITING = 'WAITING';
 	var MSG_TRASH = 'TRASH';
 	var MSG_NAVIGATE = 'NAVIGATE';
+
+	var $sidebarEl;
 
 	//Utilities
 
@@ -20,20 +21,20 @@
 
 	var injectScripts = function() {
 
-		var addChild = function(el) {
+		var inject = function(el) {
 			(document.head||document.documentElement).appendChild(el);
 		}
 
 		var dragDrop = document.createElement('script');
 		dragDrop.src = chrome.extension.getURL('dragDrop.js');
-		addChild(dragDrop);
+		inject(dragDrop);
 
 		var styles = document.createElement('link');
 		styles.href = chrome.extension.getURL('searchAid.css');
 		styles.media = 'screen, projection';
 		styles.rel = 'stylesheet';
 		styles.type = 'text/css';
-		addChild(styles);
+		inject(styles);
 	};
 
 	var getTemplate = function(path, callback) {
@@ -81,14 +82,14 @@
 				if (event.data.type === MSG_NEW_LINK) {
 					var data = parseDataString(event.data.text);
 					var key = guid();
-					var $h2 = $sidebarEl.find('.title-' + data.type);
+					var $h2 = $sidebarEl.find('.' + DIV_CLASS + '--title-' + data.type);
 					
 					storeLink(key, data);
 					createLink(key, data);
-					$h2.removeClass('waiting');
+					$h2.removeClass(DIV_CLASS + '--waiting');
 				} else if (event.data.type === MSG_WAITING) {
-					var $h2 = $sidebarEl.find('.title-' + event.data.text);
-					$h2.addClass('waiting');
+					var $h2 = $sidebarEl.find('.' + DIV_CLASS + '--title-' + event.data.text);
+					$h2.addClass(DIV_CLASS + '--waiting');
 				} else if (event.data.type === MSG_TRASH) {
 					var key = event.data.text;
 					removeLink(key);
@@ -102,17 +103,25 @@
 	var createLink = function(key, data) {
 		if ($sidebarEl && $sidebarEl.length) {
 			var type = data.type ? data.type : 'other';
-			var $ul = $sidebarEl.find('.links-list.links-' + type);
-			var $el = $('<li class="link"><span><a ondragstart="listItemDrag(event)" data-key=' + key + ' href="' + data.href + '">' + data.title + '</a></span></li>');
+			var $ul = $sidebarEl.find('.' + DIV_CLASS + '--links-' + type);
+			var $el = $('<li class="' +
+				DIV_CLASS +
+				'--links-list-item"><span><a ondragstart="listItemDrag(event)" data-key=' +
+				key +
+				' href="' +
+				data.href + '">' +
+				data.title +
+				'</a></span></li>'
+			);
 
 			$ul.append($el);
-			$ul.find('.links-list-cta').remove();
+			$ul.find('.' + DIV_CLASS + '--links-list-cta').remove();
 			$el.find('a').click(sendMessageToYammer);
 		}
 	};
 
 	var removeLink = function(key) {
-		var $link = $sidebarEl.find('a[data-key="' + key + '"]');
+		var $link = $sidebarEl.find('.' + DIV_CLASS + '--links-list-item a[data-key="' + key + '"]');
 		$link.parent().remove();
 		chrome.storage.sync.remove(key);
 		return false;
@@ -136,17 +145,17 @@
 	//Sidebar handlers
 
 	var hasSidebar = function() {
-		var $el = $('#searchAid');
+		var $el = $('.' + DIV_CLASS);
 		return $el && $el.length > 0;
 	}
 
 	var createSidebar = function() {
 		getTemplate(SIDEBAR_TEMPLATE, function(template) {
 			$sidebarEl = $(Mustache.to_html(template, {
-				id: DIVID,
+				'master-class': DIV_CLASS,
 				ext_path: chrome.extension.getURL('')
 			}));
-			$sidebarEl.addClass('off');
+			$sidebarEl.addClass(DIV_CLASS + '--off');
 			$sidebarEl.click(toggleSidebar);
 			$('body').append($sidebarEl);
 			loadLinks();
@@ -154,7 +163,7 @@
 	}
 
 	var toggleSidebar = function() {
-		$sidebarEl.toggleClass('off');
+		$sidebarEl.toggleClass(DIV_CLASS + '--off');
 	};
 
 	if(!hasSidebar()) {

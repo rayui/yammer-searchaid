@@ -1,4 +1,4 @@
-#searchAid {
+.search-aid {
   position: fixed;
   top: 0px;
   right: 0px;
@@ -13,7 +13,7 @@
   -webkit-transition: right linear 0.5s, height ease-in 0.5s, padding 0.5s, background-position 0.5s;
 }
 
-#searchAid.off {
+.search-aid.search-aid--off {
   right: -306px;
   height: 48px;
   padding: 0;
@@ -21,30 +21,30 @@
   -webkit-transition: right linear 0.5s, height ease-out 0.5s, padding 0.5s, background-position 0.5s;
 }
 
-#searchAid div {
+.search-aid div {
   opacity: 1;
   -webkit-transition: opacity 0.2s;
   -webkit-transition-delay: 0.3s;
 }
 
-#searchAid.off div {
+.search-aid.search-aid--off div {
   opacity: 0;
   -webkit-transition-delay: 0s;
 }
 
-#searchAid h1 {
+.search-aid h1 {
   margin: 5px 0 0 64px;
 }
 
-#searchAid h2 {
+.search-aid h2 {
   margin: 30px 0 0 0;
 }
 
-#searchAid h2.waiting {
+.search-aid h2.search-aid--waiting {
   background: transparent url('spinner.gif') no-repeat 100% 12px;
 }
 
-#searchAid .links-list {
+.search-aid .search-aid--links-list {
   position:relative;
   margin:0;
   padding: 10px;
@@ -53,13 +53,13 @@
   border-radius: 1px;
 }
 
-#searchAid .links-list li {
+.search-aid .search-aid--links-list-cta {
   display:block;
   margin: 0 0 8px 0;
   line-height: 14px;
 }
 
-#searchAid .trash {
+.search-aid .search-aid--trash {
   display:block;
   float:right;
   margin: 20px 0 0 0;
