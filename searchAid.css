@@ -1,5 +1,6 @@
 .search-aid {
   position: fixed;
+  top: 0px;
   right: 0px;
   width: 350px;
   height: 100%;
@@ -10,6 +11,7 @@
   padding: 20px;
   overflow-x: hidden;
   overflow-y: auto;
+  margin: 0;
   -webkit-transition: top 0.5s, width 0.5s, right linear 0.5s, height ease-in 0.5s, padding 0.5s, background-position 0.5s;
 }
 
@@ -20,6 +22,11 @@
   background-position: 4px 2px;
   overflow: hidden;
   -webkit-transition: top 0.5s, width 0.5s, right linear 0.5s, height ease-out 0.5s, padding 0.5s, background-position 0.5s;
+}
+
+.search-aid.search-aid--dragging {
+  -webkit-transtition: none !important;
+  transition: none !important;
 }
 
 .search-aid .search-aid--drag-target {

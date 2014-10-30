@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Yammer SearchAid",
 	"short_name": "Yammer SearchAid",
-  "version": "0.0.2b",
+  "version": "0.0.2.2",
   "description": "Improve your Yammer experience with SearchAid",
   "icons": {
 		"48": "yammer-search-aid-logo-48.png",

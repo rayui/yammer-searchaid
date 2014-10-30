@@ -1,5 +1,5 @@
 <div class="{{master-class}}">
-  <a class="{{master-class}}--drag-target" href="#" ondrag="changeTagPosition(event)" ondragend="storeTagPosition(event)"></a>
+  <a class="{{master-class}}--drag-target" href="#" ondragstart="startTagDrag(event)" ondrag="changeTagPosition(event)" ondragend="storeTagPosition(event)"></a>
   <div class="{{master-class}}--interactive">
     <div ondragover="allowDrop(event)" ondrop="addLinkToSidebar(event)">
       <h1>Yammer SearchAid</h1>

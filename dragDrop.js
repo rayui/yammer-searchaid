@@ -1,5 +1,6 @@
 (function(context) {
 
+  var DIV_CLASS = "search-aid";
   var MSG_NEW_LINK = 'NEW_LINK';
   var MSG_WAITING = 'WAITING';
   var MSG_TRASH = 'TRASH';
@@ -69,13 +70,25 @@
     }
   };
 
+  context.startTagDrag = function(event) {
+    yam.$(event.target.parentElement).addClass(DIV_CLASS + '--dragging');
+  }
+
   context.changeTagPosition = function(event) {
-    event.target.parentElement.style.top = event.y + 'px';
+    var offsetY = event.offsetY;
+    var currY = parseInt(event.target.parentElement.style.top, 10);
+    var newY = currY + offsetY;
+
+    if (newY <= 0 || newY > window.screen.height - event.target.parentElement.offsetHeight) return false;
+
+    event.target.parentElement.style.top = newY + 'px';
+
+    return newY;
   };
 
   context.storeTagPosition = function(event) {
-    context.changeTagPosition(event);
-    context.postMessage({ type: MSG_TAG_POSITION, text: event.y }, "*");
+    context.postMessage({ type: MSG_TAG_POSITION, text: parseInt(event.target.parentElement.style.top, 10) }, "*");
+    yam.$(event.target.parentElement).removeClass(DIV_CLASS + '--dragging');
   };
 
   var postLinkObject = function(href, title, type) {
